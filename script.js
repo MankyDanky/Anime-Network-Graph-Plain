@@ -1,51 +1,31 @@
-class Queue {
-  constructor() {
-    this.items = {};
-    this.frontIndex = 0;
-    this.backIndex = 0;
-    this.length = 0;
-  }
-  enqueue(item) {
-    this.items[this.backIndex] = item;
-    this.backIndex++;
-    this.length++;
-    return item + " inserted";
-  }
-  dequeue() {
-    const item = this.items[this.frontIndex];
-    delete this.items[this.frontIndex];
-    this.frontIndex++;
-    this.length--;
-    return item;
-  }
-  peek() {
-    return this.items[this.frontIndex];
-  }
-  get printQueue() {
-    return this.items;
-  }
+// Sleep to prevent API request errors
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
 }
 
+
+
+// Random position function
 function randomIntFromInterval(min, max) {
   return Math.floor(Math.random() * (max - min + 1) + min);
 }
-
 var MinPos = 0, MaxPos = 10000;
+
+// Graph data
 var selectedNode = "";
 var elements = [
-  { group: "nodes", data: { id: "1", title: "Cowboy Bebop" }, locked: true },
+  { group: "nodes", data: { id: "1", title: "Cowboy Bebop", size: 0.2}, locked: true },
 ];
-const visited = new Set(["1"]);
-const queue = new Queue();
-queue.enqueue("1");
-console.log(queue.length);
 
+// Create graph
 var cy = cytoscape({
   container: document.getElementById("cy"),
   layout: {
     name: "grid",
     cols: 3,
   },
+
+  // Graph style
   style: [
     {
       selector: "node",
@@ -59,8 +39,8 @@ var cy = cytoscape({
         color: "white",
         "text-outline-color": "black",
         "text-outline-width": 1,
-        height: 200,
-        width: 200,
+        height: "data(size)",
+        width: "data(size)",
         "overlay-opacity": 0,
         "background-color": "#808080",
       },
@@ -68,43 +48,53 @@ var cy = cytoscape({
   ],
 });
 
-while (queue.length > 0) {
-  console.log("here");
-  let id = queue.dequeue();
-  let recommendations;
+// Recursive add page function
+function addPage(p) {
+  // Make API requrest for top anime on given page
+  fetch("https://api.jikan.moe/v4/top/anime?filter=bypopularity&page=" + p.toString())
+  .then((response) => {
+    if (response.ok) {
+      return response.json();
+    } else {
+      throw new Error("API request failed");
+    }
+  })
+  .then((data) => {
+    // Get array of anime
+    let anime = data["data"];
+    console.log(anime);
+    // Iterate over each anime
+    for (let i = 0; i < anime.length; i++) {
+      // Add the given anime to the graph
+      let element = {
+        group: "nodes",
+        data: {
+          id: anime[i]["mal_id"],
+          title: anime[i]["titles"][0]["title"],
+          size: anime[i]["members"]/5000000*300
+        },
+        locked: true,
+        position: {x : randomIntFromInterval(MinPos, MaxPos), y : randomIntFromInterval(MinPos, MaxPos)}
+      };
 
-  fetch("https://api.jikan.moe/v4/anime/" + id + "/recommendations")
-    .then((response) => {
-      if (response.ok) {
-        return response.json();
-      } else {
-        throw new Error("API request failed");
-      }
-    })
-    .then((data) => {
-      recommendations = data["data"];
-      for (let i = 0; i < recommendations.length; i++) {
-        if (!visited.has(recommendations[i]["entry"]["mal_id"])) {
-          visited.add(recommendations[i]["entry"]["mal_id"]);
-          let element = {
-            group: "nodes",
-            data: {
-              id: recommendations[i]["entry"]["mal_id"],
-              title: recommendations[i]["entry"]["title"],
-            },
-            locked: true,
-            position: {x : randomIntFromInterval(MinPos, MaxPos), y : randomIntFromInterval(MinPos, MaxPos)}
-          };
-          elements.push(element);
-          console.log(elements);
-          cy.add(element);
-        }
-      }
-    })
-    .catch((error) => {
-      console.error(error);
-    });
+      // Add element to elements array
+      elements.push(element);
+    }
+  })
+  .catch((error) => {
+    console.error(error);
+  });
+  sleep(2000).then(()=> {
+    if (p < 8) {
+      addPage(p+1);
+    } else {
+      cy.add(elements);
+    }
+  });
 }
+
+// Add first page
+addPage(1);
 
 /*
 cy.on("mouseover", "node", function(evt) {
