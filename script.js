@@ -13,6 +13,8 @@ var MinPos = 0, MaxPos = 10000;
 
 // Graph data
 var selectedNode = "";
+let graphedAnime = new Set();
+let connectedAnime = new Set();
 var elements = [
   { group: "nodes", data: { id: "1", title: "Cowboy Bebop", size: 0.2}, locked: true },
 ];
@@ -62,7 +64,7 @@ function addPage(p) {
   .then((data) => {
     // Get array of anime
     let anime = data["data"];
-    console.log(anime);
+    
     // Iterate over each anime
     for (let i = 0; i < anime.length; i++) {
       // Add the given anime to the graph
@@ -77,18 +79,23 @@ function addPage(p) {
         position: {x : randomIntFromInterval(MinPos, MaxPos), y : randomIntFromInterval(MinPos, MaxPos)}
       };
 
-      // Add element to elements array
+      // Connect anime after delay
+      sleep(8000 + i * p * 2000).then(()=> {
+        addRelations(anime[i]["mal_id"])
+      });
+
+      // Add element to graph
+      graphedAnime.add(anime[i]["mal_id"]);
       elements.push(element);
+      cy.add(element);
     }
   })
   .catch((error) => {
     console.error(error);
   });
-  sleep(2000).then(()=> {
+  sleep(1000).then(()=> {
     if (p < 8) {
       addPage(p+1);
-    } else {
-      cy.add(elements);
     }
   });
 }
@@ -96,16 +103,54 @@ function addPage(p) {
 // Add first page
 addPage(1);
 
-/*
+// Add edge data 
+function addRelations(id) {
+  fetch("https://api.jikan.moe/v4/anime/" + id + "/recommendations")
+  .then((response) => {
+    if (response.ok) {
+      return response.json();
+    } else {
+      throw new Error("API request failed");
+    }
+  })
+  .then((data) => {
+    // Get array of connected anime
+    let relatedAnime = data["data"];
+    
+    // Iterate over each anime
+    for (let i = 0; i < Math.min(relatedAnime.length, 10); i++) {
+      if (graphedAnime.has(relatedAnime[i]["entry"]["mal_id"]) && !connectedAnime.has(relatedAnime[i]["entry"]["mal_id"])) {
+        // Add the given anime to the graph
+        let edge = {
+          group: "edges",
+          data: {
+            source: id,
+            target: relatedAnime[i]["entry"]["mal_id"]
+          }
+        };
+
+        // Add edge to graph
+        cy.add(edge);
+      }
+    }
+    connectedAnime.add(id)
+  })
+  .catch((error) => {
+    console.error(error);
+  });
+}
+
+// Interaction effects
 cy.on("mouseover", "node", function(evt) {
   var node = evt.target;
   if (selectedNode != node.id) {
+    let size = node.data("size");
     var ani = node.animation({
       style: {
         "background-color": "#b0b0b0",
         "font-size": "25px",
-        width: 250,
-        height: 250
+        width: size*1.25,
+        height: size*1.25
       },
       duration: 100
     });
@@ -116,14 +161,13 @@ cy.on("mouseover", "node", function(evt) {
 cy.on("mouseout", "node", function(evt) {
   var node = evt.target;
   if (selectedNode != node.id) {
-    console.log(node.id);
-    console.log(selectedNode.id);
+    let size = node.data("size");
     var ani = node.animation ({
       style: {
         "background-color": "#808080",
         "font-size": "20px",
-        width: 200,
-        height: 200
+        width: size,
+        height: size
       },
       duration: 100
     });
@@ -134,12 +178,13 @@ cy.on("mouseout", "node", function(evt) {
 cy.on("select", "node", function(evt) {
   var node = evt.target;
   selectedNode = node.id;
+  let size = node.data("size");
   var ani = node.animation({
     style: {
       "background-color": "#479aff",
       "font-size": "30px",
-      width: 300,
-      height: 300
+      width: size*1.5,
+      height: size*1.5
     },
     duration: 100
   });
@@ -149,12 +194,16 @@ cy.on("select", "node", function(evt) {
 cy.on("unselect", "node", function(evt) {
   var node = evt.target;
   selectedNode = "";
+  let size = node.data("size");
   var ani = node.animation({
     style: {
-      "background-color": "#808080"
+      "background-color": "#808080",
+      width: size,
+      height: size,
+      "font-size": "20px"
     },
     duration: 100
   });
   ani.play();
 });
-*/
+
