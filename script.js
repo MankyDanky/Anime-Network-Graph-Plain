@@ -1,3 +1,5 @@
+import { generateRandGraph } from "./utils/testing-tools.js";
+
 class Queue {
   constructor() {
     this.items = {};
@@ -26,14 +28,15 @@ class Queue {
   }
 }
 
-function randomIntFromInterval(min, max) {
-  return Math.floor(Math.random() * (max - min + 1) + min);
-}
-
-var MinPos = 0, MaxPos = 10000;
+var MinPos = 0,
+  MaxPos = 10000;
 var selectedNode = "";
 var elements = [
-  { group: "nodes", data: { id: "1", title: "Cowboy Bebop" }, locked: true },
+  {
+    group: "nodes",
+    data: { id: "whatever", title: "Cowboy"},
+    locked: true,
+  },
 ];
 const visited = new Set(["1"]);
 const queue = new Queue();
@@ -59,8 +62,8 @@ var cy = cytoscape({
         color: "white",
         "text-outline-color": "black",
         "text-outline-width": 1,
-        height: 200,
-        width: 200,
+        height: "data(size)",
+        width: "data(size)",
         "overlay-opacity": 0,
         "background-color": "#808080",
       },
@@ -68,43 +71,59 @@ var cy = cytoscape({
   ],
 });
 
-while (queue.length > 0) {
-  console.log("here");
-  let id = queue.dequeue();
-  let recommendations;
+function load_nodes() {
+  while (queue.length > 0) {
+    console.log("here");
+    let id = queue.dequeue();
+    let recommendations;
 
-  fetch("https://api.jikan.moe/v4/anime/" + id + "/recommendations")
-    .then((response) => {
-      if (response.ok) {
-        return response.json();
-      } else {
-        throw new Error("API request failed");
-      }
-    })
-    .then((data) => {
-      recommendations = data["data"];
-      for (let i = 0; i < recommendations.length; i++) {
-        if (!visited.has(recommendations[i]["entry"]["mal_id"])) {
-          visited.add(recommendations[i]["entry"]["mal_id"]);
-          let element = {
-            group: "nodes",
-            data: {
-              id: recommendations[i]["entry"]["mal_id"],
-              title: recommendations[i]["entry"]["title"],
-            },
-            locked: true,
-            position: {x : randomIntFromInterval(MinPos, MaxPos), y : randomIntFromInterval(MinPos, MaxPos)}
-          };
-          elements.push(element);
-          console.log(elements);
-          cy.add(element);
+    fetch("https://api.jikan.moe/v4/anime/" + id + "/recommendations")
+      .then((response) => {
+        if (response.ok) {
+          return response.json();
+        } else {
+          throw new Error("API request failed");
         }
-      }
-    })
-    .catch((error) => {
-      console.error(error);
-    });
+      })
+      .then((data) => {
+        recommendations = data["data"];
+        for (let i = 0; i < recommendations.length; i++) {
+          if (!visited.has(recommendations[i]["entry"]["mal_id"])) {
+            visited.add(recommendations[i]["entry"]["mal_id"]);
+            let element = {
+              group: "nodes",
+              data: {
+                id: recommendations[i]["entry"]["mal_id"],
+                title: recommendations[i]["entry"]["title"],
+              },
+              locked: true,
+              position: {
+                x: randomIntFromInterval(MinPos, MaxPos),
+                y: randomIntFromInterval(MinPos, MaxPos),
+              },
+            };
+            elements.push(element);
+            console.log(elements);
+            cy.add(element);
+          }
+        }
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+  }
 }
+
+let graph_elements = generateRandGraph(5);
+console.log(graph_elements);
+console.log(elements);
+cy.add(graph_elements);
+
+let layout = cy.layout({
+  name: "cose",
+});
+
+layout.run();
 
 /*
 cy.on("mouseover", "node", function(evt) {
