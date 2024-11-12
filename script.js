@@ -1,22 +1,50 @@
+import { generateRandGraph } from "./utils/testing-tools.js";
+import { randomIntFromInterval } from "./utils/math-tools.js";
+
 // Sleep to prevent API request errors
 function sleep(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-
-
-// Random position function
-function randomIntFromInterval(min, max) {
-  return Math.floor(Math.random() * (max - min + 1) + min);
+class Queue {
+  constructor() {
+    this.items = {};
+    this.frontIndex = 0;
+    this.backIndex = 0;
+    this.length = 0;
+  }
+  enqueue(item) {
+    this.items[this.backIndex] = item;
+    this.backIndex++;
+    this.length++;
+    return item + " inserted";
+  }
+  dequeue() {
+    const item = this.items[this.frontIndex];
+    delete this.items[this.frontIndex];
+    this.frontIndex++;
+    this.length--;
+    return item;
+  }
+  peek() {
+    return this.items[this.frontIndex];
+  }
+  get printQueue() {
+    return this.items;
+  }
 }
-var MinPos = 0, MaxPos = 10000;
 
-// Graph data
+var MinPos = 0,
+  MaxPos = 10000;
 var selectedNode = "";
 let graphedAnime = new Set();
 let connectedAnime = new Set();
 var elements = [
-  { group: "nodes", data: { id: "1", title: "Cowboy Bebop", size: 0.2}, locked: true },
+  {
+    group: "nodes",
+    data: { id: "whatever", title: "Cowboy" },
+    locked: true,
+  },
 ];
 
 // Create graph
@@ -96,6 +124,8 @@ function addPage(p) {
   sleep(1000).then(()=> {
     if (p < 8) {
       addPage(p+1);
+    } else {
+      cy.add(elements);
     }
   });
 }
@@ -194,16 +224,25 @@ cy.on("select", "node", function(evt) {
 cy.on("unselect", "node", function(evt) {
   var node = evt.target;
   selectedNode = "";
-  let size = node.data("size");
   var ani = node.animation({
     style: {
-      "background-color": "#808080",
-      width: size,
-      height: size,
-      "font-size": "20px"
+      "background-color": "#808080"
     },
     duration: 100
   });
   ani.play();
 });
+
+function main() {
+  let graph_elements = generateRandGraph(10);
+  cy.add(graph_elements);
+  let layout = cy.layout({
+    name: "cose",
+    animate: true,
+    edgeElasticity: (edge) => edge.data("weight"),
+  });
+  layout.run();
+}
+
+main();
 
