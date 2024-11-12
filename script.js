@@ -189,3 +189,16 @@ function makeCyInteractive() {
     ani.play();
   });
 }
+
+function main() {
+  let graph_elements = generateRandGraph(10);
+  cy.add(graph_elements);
+  let layout = cy.layout({
+    name: "cose",
+    animate: true,
+    edgeElasticity: (edge) => edge.data("weight"),
+  });
+  layout.run();
+}
+
+main();

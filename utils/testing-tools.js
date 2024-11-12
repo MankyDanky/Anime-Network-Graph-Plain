@@ -20,7 +20,7 @@ export function generateRandGraph(num) {
       data: {
         id: i,
         title: i.toString(),
-        size: randomIntFromInterval(minSize, maxSize), // not working
+        size: 30, 
       },
     //   position: {
     //     x: randomIntFromInterval(minPos, maxPos),
@@ -33,7 +33,7 @@ export function generateRandGraph(num) {
     // generate edges with random weight
     for (let i = 0; i < num; i++) {
       for (let j = i + 1; j < num; j += randomIntFromInterval(0, 4)) {
-        let weight = randomIntFromInterval(minSize, maxSize);
+        let weight = 10000;
         edges.push({
           group: "edges",
           data: {
