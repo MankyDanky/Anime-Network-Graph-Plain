@@ -6,53 +6,20 @@ function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-class Queue {
-  constructor() {
-    this.items = {};
-    this.frontIndex = 0;
-    this.backIndex = 0;
-    this.length = 0;
-  }
-  enqueue(item) {
-    this.items[this.backIndex] = item;
-    this.backIndex++;
-    this.length++;
-    return item + " inserted";
-  }
-  dequeue() {
-    const item = this.items[this.frontIndex];
-    delete this.items[this.frontIndex];
-    this.frontIndex++;
-    this.length--;
-    return item;
-  }
-  peek() {
-    return this.items[this.frontIndex];
-  }
-  get printQueue() {
-    return this.items;
-  }
-}
-
 var MinPos = 0,
   MaxPos = 10000;
 var selectedNode = "";
 let graphedAnime = new Set();
 let connectedAnime = new Set();
-var elements = [
-  {
-    group: "nodes",
-    data: { id: "whatever", title: "Cowboy" },
-    locked: true,
-  },
-];
+var elements = [];
 
 // Create graph
 var cy = cytoscape({
   container: document.getElementById("cy"),
   layout: {
-    name: "grid",
-    cols: 3,
+    name: "cose",
+    animate: true,
+    edgeElasticity: (edge) => edge.data("weight"),
   },
 
   // Graph style
@@ -103,7 +70,6 @@ function addPage(p) {
           title: anime[i]["titles"][0]["title"],
           size: anime[i]["members"]/5000000*300
         },
-        locked: true,
         position: {x : randomIntFromInterval(MinPos, MaxPos), y : randomIntFromInterval(MinPos, MaxPos)}
       };
 
@@ -121,11 +87,11 @@ function addPage(p) {
   .catch((error) => {
     console.error(error);
   });
+
+  // Add next page
   sleep(1000).then(()=> {
     if (p < 8) {
       addPage(p+1);
-    } else {
-      cy.add(elements);
     }
   });
 }
@@ -155,7 +121,8 @@ function addRelations(id) {
           group: "edges",
           data: {
             source: id,
-            target: relatedAnime[i]["entry"]["mal_id"]
+            target: relatedAnime[i]["entry"]["mal_id"],
+            weight: i
           }
         };
 
@@ -232,17 +199,4 @@ cy.on("unselect", "node", function(evt) {
   });
   ani.play();
 });
-
-function main() {
-  let graph_elements = generateRandGraph(10);
-  cy.add(graph_elements);
-  let layout = cy.layout({
-    name: "cose",
-    animate: true,
-    edgeElasticity: (edge) => edge.data("weight"),
-  });
-  layout.run();
-}
-
-main();
 
