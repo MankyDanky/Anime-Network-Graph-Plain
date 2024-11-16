@@ -19,8 +19,7 @@ function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-sleep(1000).then(() => {
-  console.log(elData);
+sleep(2000).then(() => {
   let selectedNode = "";
   //let graphedAnime = new Set();
   //let connectedAnime = new Set();
@@ -28,6 +27,74 @@ sleep(1000).then(() => {
   // Create graph
   let cy = cytoscape({
     container: document.getElementById("cy"),
+    layout: {
+      name: 'cose',
+    
+      // Called on `layoutready`
+      ready: function(){},
+    
+      // Called on `layoutstop`
+      stop: function(){},
+    
+      // Whether to animate while running the layout
+      // true : Animate continuously as the layout is running
+      // false : Just show the end result
+      // 'end' : Animate with the end result, from the initial positions to the end positions
+      animate: true,
+    
+      // Easing of the animation for animate:'end'
+      animationEasing: undefined,
+    
+      // The duration of the animation for animate:'end'
+      animationDuration: undefined,
+    
+      // A function that determines whether the node should be animated
+      // All nodes animated by default on animate enabled
+      // Non-animated nodes are positioned immediately when the layout starts
+      animateFilter: function ( node, i ){ return true; },
+    
+    
+      // The layout animates only after this many milliseconds for animate:true
+      // (prevents flashing on fast runs)
+      animationThreshold: 250,
+    
+      // Number of iterations between consecutive screen positions update
+      refresh: 20,
+    
+      // Whether to fit the network view after when done
+      fit: true,
+    
+      // Padding on fit
+      padding: 30,
+    
+      // Constrain layout bounds; { x1, y1, x2, y2 } or { x1, y1, w, h }
+      boundingBox: undefined,
+    
+      // Excludes the label when calculating node bounding boxes for the layout algorithm
+      nodeDimensionsIncludeLabels: false,
+    
+      // Randomize the initial positions of the nodes (true) or use existing positions (false)
+      randomize: false,
+    
+      // Extra spacing between components in non-compound graphs
+      componentSpacing: 40,
+    
+      // Node repulsion (non overlapping) multiplier
+      nodeRepulsion: function( node ){ return 300000; },
+    
+      // Node repulsion (overlapping) multiplier
+      nodeOverlap: 1000,
+    
+      // Ideal edge (non nested) length
+      idealEdgeLength: function( edge ){ return 0},
+      edgeElasticity: function( edge ){ return 32; },
+      nestingFactor: 1.2,
+      gravity: 1,
+      numIter: 5000,
+      initialTemp: 5000,
+      coolingFactor: 0.99,
+      minTemp: 1.0
+    },
     // Graph style
     style: [
       {
@@ -35,7 +102,7 @@ sleep(1000).then(() => {
         style: {
           label: "data(title)",
           "font-family": "Trebuchet MS",
-          "font-size": "20px",
+          "font-size": function(node){return node.data("size")/10},
           "font-weight": "bold",
           "text-valign": "center",
           "text-halign": "center",
@@ -51,7 +118,8 @@ sleep(1000).then(() => {
     ],
     elements: elData
   });
-  
+
+
   
   function createGraph() {
     let layout = cy.layout({
@@ -77,7 +145,7 @@ sleep(1000).then(() => {
     JSONToFile(elements, 'elementsFile');*/
   }
   
-  createGraph()
+  //createGraph()
 })
 
 
