@@ -1,4 +1,4 @@
-export default elements = [
+[
   {
     "group": "nodes",
     "data": {
@@ -5343,4 +5343,4 @@ export default elements = [
       "id": "a13b3313-451f-4d9f-b144-061ea5d11f3c"
     }
   }
-];
+]

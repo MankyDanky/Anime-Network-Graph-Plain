@@ -48,12 +48,12 @@ sleep(1000).then(() => {
           "background-color": "#808080",
         },
       },
-    ]
+    ],
+    elements: elData
   });
   
   
   function createGraph() {
-    cy.add(elData);
     let layout = cy.layout({
       name: "cose",
       animate: true,
