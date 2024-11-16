@@ -12,9 +12,10 @@ var selectedNode = "";
 let graphedAnime = new Set();
 let connectedAnime = new Set();
 var elements = [];
+let cy;
 
 // Create graph
-var cy = cytoscape({
+cy = cytoscape({
   container: document.getElementById("cy"),
   layout: {
     name: "cose",
@@ -42,8 +43,19 @@ var cy = cytoscape({
         "background-color": "#808080",
       },
     },
-  ],
+  ]
 });
+
+function createGraph() {
+  cy.add(elements);
+  let layout = cy.layout({
+    name: "cose",
+    animate: true,
+    edgeElasticity: (edge) => edge.data("weight"),
+  });
+  layout.run();
+}
+
 
 // Recursive add page function
 function addPage(p) {
@@ -81,7 +93,6 @@ function addPage(p) {
       // Add element to graph
       graphedAnime.add(anime[i]["mal_id"]);
       elements.push(element);
-      cy.add(element);
     }
   })
   .catch((error) => {
@@ -92,6 +103,12 @@ function addPage(p) {
   sleep(1000).then(()=> {
     if (p < 8) {
       addPage(p+1);
+    }
+    else
+    { 
+      sleep(2500*201).then(()=> {
+        createGraph()
+      });
     }
   });
 }
@@ -122,12 +139,11 @@ function addRelations(id) {
           data: {
             source: id,
             target: relatedAnime[i]["entry"]["mal_id"],
-            weight: i
+            "weight": i
           }
         };
-
         // Add edge to graph
-        cy.add(edge);
+        elements.push(edge);
       }
     }
     connectedAnime.add(id)
@@ -138,6 +154,7 @@ function addRelations(id) {
 }
 
 // Interaction effects
+/*
 cy.on("mouseover", "node", function(evt) {
   var node = evt.target;
   if (selectedNode != node.id) {
@@ -199,4 +216,4 @@ cy.on("unselect", "node", function(evt) {
   });
   ani.play();
 });
-
+*/
