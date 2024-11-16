@@ -1,4 +1,3 @@
-import { generateRandGraph } from "./utils/testing-tools.js";
 import { randomIntFromInterval } from "./utils/math-tools.js";
 
 // Sleep to prevent API request errors
