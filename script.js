@@ -1,61 +1,87 @@
-import { randomIntFromInterval } from "./utils/math-tools.js";
+
+var elData;
+fetch("elements.json")
+  .then((res) => {
+      if (!res.ok) {
+          throw new Error
+              (`HTTP error! Status: ${res.status}`);
+      }
+      return res.json();
+  })
+  .then((data)=> {
+    elData = data;
+    return data
+  })
+  .catch((error) => console.error("Unable to fetch data:", error));
 
 // Sleep to prevent API request errors
 function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-var MinPos = 0,
-  MaxPos = 10000;
-var selectedNode = "";
-let graphedAnime = new Set();
-let connectedAnime = new Set();
-var elements = [];
-let cy;
-
-// Create graph
-cy = cytoscape({
-  container: document.getElementById("cy"),
-  layout: {
-    name: "cose",
-    animate: true,
-    edgeElasticity: (edge) => edge.data("weight"),
-  },
-
-  // Graph style
-  style: [
-    {
-      selector: "node",
-      style: {
-        label: "data(title)",
-        "font-family": "Trebuchet MS",
-        "font-size": "20px",
-        "font-weight": "bold",
-        "text-valign": "center",
-        "text-halign": "center",
-        color: "white",
-        "text-outline-color": "black",
-        "text-outline-width": 1,
-        height: "data(size)",
-        width: "data(size)",
-        "overlay-opacity": 0,
-        "background-color": "#808080",
+sleep(1000).then(() => {
+  console.log(elData);
+  let selectedNode = "";
+  //let graphedAnime = new Set();
+  //let connectedAnime = new Set();
+  
+  // Create graph
+  let cy = cytoscape({
+    container: document.getElementById("cy"),
+    // Graph style
+    style: [
+      {
+        selector: "node",
+        style: {
+          label: "data(title)",
+          "font-family": "Trebuchet MS",
+          "font-size": "20px",
+          "font-weight": "bold",
+          "text-valign": "center",
+          "text-halign": "center",
+          color: "white",
+          "text-outline-color": "black",
+          "text-outline-width": 1,
+          height: "data(size)",
+          width: "data(size)",
+          "overlay-opacity": 0,
+          "background-color": "#808080",
+        },
       },
-    },
-  ]
-});
-
-function createGraph() {
-  cy.add(elements);
-  let layout = cy.layout({
-    name: "cose",
-    animate: true,
-    edgeElasticity: (edge) => edge.data("weight"),
+    ]
   });
-  layout.run();
-}
+  
+  
+  function createGraph() {
+    cy.add(elData);
+    let layout = cy.layout({
+      name: "cose",
+      animate: true,
+      edgeElasticity: (edge) => edge.data("weight"),
+    });
+    layout.run();
+  
+    /* Saves json file after creatioj
+    const JSONToFile = (obj, filename) => {
+      const blob = new Blob([JSON.stringify(obj, null, 2)], {
+        type: 'application/json',
+      });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${filename}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+    };
+    
+    JSONToFile(elements, 'elementsFile');*/
+  }
+  
+  createGraph()
+})
 
 
+/*
 // Recursive add page function
 function addPage(p) {
   // Make API requrest for top anime on given page
@@ -80,12 +106,11 @@ function addPage(p) {
           id: anime[i]["mal_id"],
           title: anime[i]["titles"][0]["title"],
           size: anime[i]["members"]/5000000*300
-        },
-        position: {x : randomIntFromInterval(MinPos, MaxPos), y : randomIntFromInterval(MinPos, MaxPos)}
+        }
       };
 
       // Connect anime after delay
-      sleep(8000 + i * p * 2000).then(()=> {
+      sleep(8000 + i * p * 4000).then(()=> {
         addRelations(anime[i]["mal_id"])
       });
 
@@ -102,11 +127,15 @@ function addPage(p) {
   sleep(1000).then(()=> {
     if (p < 8) {
       addPage(p+1);
+      console.log("Next page")
     }
     else
     { 
-      sleep(2500*201).then(()=> {
+      console.log(elements)
+      console.log("Done adding pages, will add graph in 10 minutes")
+      sleep(4000*201).then(()=> {
         createGraph()
+        console.log(elements)
       });
     }
   });
@@ -151,6 +180,7 @@ function addRelations(id) {
     console.error(error);
   });
 }
+*/
 
 // Interaction effects
 /*
