@@ -1,5 +1,9 @@
 
-var elData;
+let elData;
+let cy;
+let selectedNode = "";
+
+// Get elements from JSON data
 fetch("elements.json")
   .then((res) => {
       if (!res.ok) {
@@ -14,18 +18,72 @@ fetch("elements.json")
   })
   .catch((error) => console.error("Unable to fetch data:", error));
 
-// Sleep to prevent API request errors
+// Show/hide info board
+function toggleInfoBoard() {
+  
+  // Get icon and board to hide/display
+  const icon = document.getElementById("icon");
+  const board = document.getElementById("info");
+
+  // Check whether board is being hidden or displayed
+  if (selectedNode === "") {
+    board.classList.remove("displayed");
+    icon.classList.remove("displayed");
+    
+  } else {
+    // Get necessary html elements
+    
+    const title = document.getElementById("infoTitle");
+    const popularityRank = document.getElementById("popularityRank");
+    const score = document.getElementById("score");
+    const genres = document.getElementById("genres");
+    
+    // Get necessary anime information
+    fetch("https://api.jikan.moe/v4/anime/" + selectedNode)
+    .then((response) => {
+      if (response.ok) {
+        return response.json();
+      } else {
+        throw new Error("API request failed");
+      }
+    })
+    .then((data) => {
+      // Update board information
+      if (selectedNode != "") {
+        board.classList.add("displayed");
+        icon.classList.add("displayed");
+      }
+      title.innerHTML=data["data"]["titles"][0]["title"];
+      popularityRank.innerHTML=data["data"]["popularity"];
+      let genresText = "";
+      let genresNumber = data["data"]["genres"].length;
+      for (let i = 0; i < genresNumber; i++) {
+        genresText +=  data["data"]["genres"][i]["name"]
+        if (i < genresNumber-1) {
+          genresText += ", ";
+        }
+      }
+      genres.innerHTML=genresText;
+      score.innerHTML=data["data"]["score"];
+      icon.src=data["data"]["images"]["jpg"]["image_url"];
+    })
+    .catch((error) => {
+      console.error(error);
+    })
+  }
+}
+
+// Sleep to prevent fetch request errors
 function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
+// Create graph after two seconds
 sleep(2000).then(() => {
-  let selectedNode = "";
   //let graphedAnime = new Set();
   //let connectedAnime = new Set();
-  
   // Create graph
-  let cy = cytoscape({
+  cy = cytoscape({
     container: document.getElementById("cy"),
     // Graph layout
     layout: {
@@ -73,39 +131,80 @@ sleep(2000).then(() => {
           width: "data(size)",
           "overlay-opacity": 0,
           "background-color": "#808080",
+          "transition-property": "background-color",
+          'transition-duration': 0.5,
+          "transition-timing-function": "ease",
         },
       },
+      {selector: "edge",
+        style: {
+          "overlay-opacity": 0,
+          "line-color": "#808080",
+          "width": function(edge){
+            return 10 - edge.data("weight")
+          },
+          "overlay-opacity": 0
+        },
+      },
+      {
+        selector: 'edge:selected',
+        style: {
+          'line-color': "#808080",
+        }
+      },
+      {
+        selector: 'node.hover',
+        style: {
+          "transition-property": "background-color",
+          'transition-duration': 0.5,
+          "transition-timing-function": "ease",
+          "background-color": "#adadad",
+          "font-size": function(node){return node.data("size")*0.125},
+          "width": function (node) {return node.data("size")*1.25},
+          "height": function (node) {return node.data("size")*1.25},
+        }
+      },
+      {
+        selector: 'node:selected',
+        style: {
+          "transition-property": "background-color",
+          'transition-duration': 0.5,
+          "transition-timing-function": "ease",
+          "background-color": "#479aff",
+          "font-size": function(node){return node.data("size")*0.15},
+          "width": function (node) {return node.data("size")*1.5},
+          "height": function (node) {return node.data("size")*1.5},
+        }
+      }
     ],
     elements: elData
   });
 
-
+  // Node selection and hover responses
+  cy.on("mouseover", "node", function(evt) {
+    let node = evt.target;
+    node.addClass("hover");
+  });
   
-  function createGraph() {
-    let layout = cy.layout({
-      name: "cose",
-      animate: true,
-      edgeElasticity: (edge) => edge.data("weight"),
-    });
-    layout.run();
-  
-    /* Saves json file after creatioj
-    const JSONToFile = (obj, filename) => {
-      const blob = new Blob([JSON.stringify(obj, null, 2)], {
-        type: 'application/json',
-      });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `${filename}.json`;
-      a.click();
-      URL.revokeObjectURL(url);
-    };
+  cy.on("mouseout", "node", function(evt) {
+    let node = evt.target;
+    node.removeClass("hover");
     
-    JSONToFile(elements, 'elementsFile');*/
-  }
+  });
   
-  //createGraph()
+  cy.on("select", "node", function(evt) {
+    let node = evt.target;
+    sleep(250).then(()=>{
+      selectedNode = node.data("id");
+      toggleInfoBoard();
+    })
+  });
+  
+  cy.on("unselect", "node", function(evt) {
+    selectedNode = "";
+    toggleInfoBoard();
+  });
+
 })
 
 
@@ -208,69 +307,4 @@ function addRelations(id) {
     console.error(error);
   });
 }
-*/
-
-// Interaction effects
-/*
-cy.on("mouseover", "node", function(evt) {
-  var node = evt.target;
-  if (selectedNode != node.id) {
-    let size = node.data("size");
-    var ani = node.animation({
-      style: {
-        "background-color": "#b0b0b0",
-        "font-size": "25px",
-        width: size*1.25,
-        height: size*1.25
-      },
-      duration: 100
-    });
-    ani.play();
-  }
-});
-
-cy.on("mouseout", "node", function(evt) {
-  var node = evt.target;
-  if (selectedNode != node.id) {
-    let size = node.data("size");
-    var ani = node.animation ({
-      style: {
-        "background-color": "#808080",
-        "font-size": "20px",
-        width: size,
-        height: size
-      },
-      duration: 100
-    });
-    ani.play();
-  }
-});
-
-cy.on("select", "node", function(evt) {
-  var node = evt.target;
-  selectedNode = node.id;
-  let size = node.data("size");
-  var ani = node.animation({
-    style: {
-      "background-color": "#479aff",
-      "font-size": "30px",
-      width: size*1.5,
-      height: size*1.5
-    },
-    duration: 100
-  });
-  ani.play();
-});
-
-cy.on("unselect", "node", function(evt) {
-  var node = evt.target;
-  selectedNode = "";
-  var ani = node.animation({
-    style: {
-      "background-color": "#808080"
-    },
-    duration: 100
-  });
-  ani.play();
-});
 */
