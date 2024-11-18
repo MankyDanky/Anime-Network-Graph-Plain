@@ -206,10 +206,13 @@ sleep(2000).then(() => {
   
   cy.on("select", "node", function(evt) {
     let node = evt.target;
+
+    // get the neighbors of the selected node and highlight them
     let neighbors = node.neighborhood('node');
     for (let i=0;i<neighbors.length;i++){
       neighbors[i].addClass("neighbor");
     }  
+
     sleep(250).then(()=>{
       selectedNode = node.data("id");
       toggleInfoBoard();
@@ -221,6 +224,8 @@ sleep(2000).then(() => {
     toggleInfoBoard();
     let node = evt.target;
     let neighbors = node.neighborhood('node');
+
+    // de-highlight the neighboring nodes
     for (let i=0;i<neighbors.length;i++){
       neighbors[i].removeClass("neighbor");
     }  
