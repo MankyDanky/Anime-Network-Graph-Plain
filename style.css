@@ -54,10 +54,15 @@ button {
     height: 100%;
     width: 20%;
     display: inline-block;
+    transition-duration: 100ms;
 }
 
 button:hover {
     background: #ccc;
+}
+
+button:active {
+    background: #479aff;
 }
   
 
@@ -112,7 +117,7 @@ th {
 }
 
 #info.displayed {
-    top: 70%;
+    bottom: 70%;
 }
 
   
