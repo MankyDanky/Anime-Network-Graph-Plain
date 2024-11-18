@@ -52,7 +52,11 @@ function toggleInfoBoard() {
         board.classList.add("displayed");
         icon.classList.add("displayed");
       }
-      title.innerHTML=data["data"]["titles"][0]["title"];
+      let titleText = data["data"]["titles"][0]["title"];
+      if (titleText.length > 30) {
+        titleText = titleText.substring(0, 20) + " ...";
+      }
+      title.innerHTML=titleText;
       popularityRank.innerHTML=data["data"]["popularity"];
       let genresText = "";
       let genresNumber = data["data"]["genres"].length;
@@ -231,7 +235,7 @@ sleep(2000).then(() => {
       for (let i = 0; i < elements.length; i++) {
         elements[i].removeClass("hidden")
       }
-      
+
       let hiddenNodes = new Set();
       let nodes = cy.nodes();
       for (let i = 0; i < nodes.length; i++) {
