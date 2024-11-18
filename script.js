@@ -1,10 +1,9 @@
-
 let elData;
 let cy;
 let selectedNode = "";
 
 // Get elements from JSON data
-fetch("elements.json")
+fetch("data.json")
   .then((res) => {
       if (!res.ok) {
           throw new Error
@@ -87,31 +86,13 @@ sleep(2000).then(() => {
     container: document.getElementById("cy"),
     // Graph layout
     layout: {
-      name: 'cose',
-      ready: function(){},
-      stop: function(){},
-      animate: true,
-      animationEasing: undefined,
-      animationDuration: undefined,
-      animateFilter: function ( node, i ){ return true; },
-      animationThreshold: 250,
-      refresh: 20,
-      fit: true,
-      padding: 30,
-      boundingBox: undefined,
-      nodeDimensionsIncludeLabels: false,
-      randomize: true,
-      componentSpacing: 100,
-      nodeRepulsion: function( node ){ return 300000; },
-      nodeOverlap: 1000,
-      idealEdgeLength: function( edge ){ return 0},
-      edgeElasticity: function( edge ){ return 32; },
-      nestingFactor: 1.2,
-      gravity: 1,
-      numIter: 2000,
-      initialTemp: 2000,
-      coolingFactor: 0.99,
-      minTemp: 1.0
+      name: 'cose-bilkent',
+        animate: 'end',
+        animationEasing: 'ease-out',
+        animationDuration: 1000,
+        nodeRepulsion: 2000000,
+        idealEdgeLength: 1000,
+        randomize: true
     },
     // Graph style
     style: [
@@ -141,7 +122,7 @@ sleep(2000).then(() => {
           "overlay-opacity": 0,
           "line-color": "#808080",
           "width": function(edge){
-            return 10 - edge.data("weight")
+            return 5/edge.data("weight")
           },
           "overlay-opacity": 0
         },
