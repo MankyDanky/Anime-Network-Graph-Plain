@@ -159,6 +159,18 @@ sleep(2000).then(() => {
           "width": function (node) {return node.data("size")*1.5},
           "height": function (node) {return node.data("size")*1.5},
         }
+      },
+      {
+        selector: 'node.neighbor',
+        style: {
+          "transition-property": "background-color",
+          'transition-duration': 0.5,
+          "transition-timing-function": "ease",
+          "background-color": "#ebd834",
+          "font-size": function(node){return node.data("size")*0.12},
+          "width": function (node) {return node.data("size")*1.2},
+          "height": function (node) {return node.data("size")*1.2},
+        }
       }
     ],
     elements: elData
@@ -178,6 +190,13 @@ sleep(2000).then(() => {
   
   cy.on("select", "node", function(evt) {
     let node = evt.target;
+
+    // get the neighbors of the selected node and highlight them
+    let neighbors = node.neighborhood('node');
+    for (let i=0;i<neighbors.length;i++){
+      neighbors[i].addClass("neighbor");
+    }  
+
     sleep(250).then(()=>{
       selectedNode = node.data("id");
       toggleInfoBoard();
@@ -187,6 +206,13 @@ sleep(2000).then(() => {
   cy.on("unselect", "node", function(evt) {
     selectedNode = "";
     toggleInfoBoard();
+    let node = evt.target;
+    let neighbors = node.neighborhood('node');
+
+    // de-highlight the neighboring nodes
+    for (let i=0;i<neighbors.length;i++){
+      neighbors[i].removeClass("neighbor");
+    }  
   });
 
   cy.autoungrabify(true);
