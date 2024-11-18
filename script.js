@@ -79,8 +79,6 @@ function sleep(ms) {
 
 // Create graph after two seconds
 sleep(2000).then(() => {
-  //let graphedAnime = new Set();
-  //let connectedAnime = new Set();
   // Create graph
   cy = cytoscape({
     container: document.getElementById("cy"),
@@ -115,8 +113,8 @@ sleep(2000).then(() => {
           width: "data(size)",
           "overlay-opacity": 0,
           "background-color": "#808080",
-          "transition-property": "background-color",
-          'transition-duration': 0.5,
+          "transition-property": "background-color, font-size",
+          'transition-duration': "0.1s",
           "transition-timing-function": "ease",
         },
       },
@@ -137,11 +135,17 @@ sleep(2000).then(() => {
         }
       },
       {
+        selector: 'node.neighbor',
+        style: {
+          "background-color": "#ebd834",
+          "font-size": function(node){return node.data("size")*0.12},
+          "width": function (node) {return node.data("size")*1.2},
+          "height": function (node) {return node.data("size")*1.2},
+        }
+      },
+      {
         selector: 'node.hover',
         style: {
-          "transition-property": "background-color",
-          'transition-duration': 0.5,
-          "transition-timing-function": "ease",
           "background-color": "#adadad",
           "font-size": function(node){return node.data("size")*0.125},
           "width": function (node) {return node.data("size")*1.25},
@@ -151,25 +155,10 @@ sleep(2000).then(() => {
       {
         selector: 'node:selected',
         style: {
-          "transition-property": "background-color",
-          'transition-duration': 0.5,
-          "transition-timing-function": "ease",
           "background-color": "#479aff",
           "font-size": function(node){return node.data("size")*0.15},
           "width": function (node) {return node.data("size")*1.5},
           "height": function (node) {return node.data("size")*1.5},
-        }
-      },
-      {
-        selector: 'node.neighbor',
-        style: {
-          "transition-property": "background-color",
-          'transition-duration': 0.5,
-          "transition-timing-function": "ease",
-          "background-color": "#ebd834",
-          "font-size": function(node){return node.data("size")*0.12},
-          "width": function (node) {return node.data("size")*1.2},
-          "height": function (node) {return node.data("size")*1.2},
         }
       }
     ],
@@ -193,11 +182,14 @@ sleep(2000).then(() => {
 
     // get the neighbors of the selected node and highlight them
     let neighbors = node.neighborhood('node');
+    
     for (let i=0;i<neighbors.length;i++){
       neighbors[i].addClass("neighbor");
     }  
-
+    
+    // Give enough time to hide board if a node is selected then redisplay board
     sleep(250).then(()=>{
+
       selectedNode = node.data("id");
       toggleInfoBoard();
     })
@@ -208,7 +200,7 @@ sleep(2000).then(() => {
     toggleInfoBoard();
     let node = evt.target;
     let neighbors = node.neighborhood('node');
-
+    
     // de-highlight the neighboring nodes
     for (let i=0;i<neighbors.length;i++){
       neighbors[i].removeClass("neighbor");
@@ -218,105 +210,3 @@ sleep(2000).then(() => {
   cy.autoungrabify(true);
 
 })
-
-
-/*
-// Recursive add page function
-function addPage(p) {
-  // Make API requrest for top anime on given page
-  fetch("https://api.jikan.moe/v4/top/anime?filter=bypopularity&page=" + p.toString())
-  .then((response) => {
-    if (response.ok) {
-      return response.json();
-    } else {
-      throw new Error("API request failed");
-    }
-  })
-  .then((data) => {
-    // Get array of anime
-    let anime = data["data"];
-    
-    // Iterate over each anime
-    for (let i = 0; i < anime.length; i++) {
-      // Add the given anime to the graph
-      let element = {
-        group: "nodes",
-        data: {
-          id: anime[i]["mal_id"],
-          title: anime[i]["titles"][0]["title"],
-          size: anime[i]["members"]/5000000*300
-        }
-      };
-
-      // Connect anime after delay
-      sleep(8000 + i * p * 4000).then(()=> {
-        addRelations(anime[i]["mal_id"])
-      });
-
-      // Add element to graph
-      graphedAnime.add(anime[i]["mal_id"]);
-      elements.push(element);
-    }
-  })
-  .catch((error) => {
-    console.error(error);
-  });
-
-  // Add next page
-  sleep(1000).then(()=> {
-    if (p < 8) {
-      addPage(p+1);
-      console.log("Next page")
-    }
-    else
-    { 
-      console.log(elements)
-      console.log("Done adding pages, will add graph in 10 minutes")
-      sleep(4000*201).then(()=> {
-        createGraph()
-        console.log(elements)
-      });
-    }
-  });
-}
-
-// Add first page
-addPage(1);
-
-// Add edge data 
-function addRelations(id) {
-  fetch("https://api.jikan.moe/v4/anime/" + id + "/recommendations")
-  .then((response) => {
-    if (response.ok) {
-      return response.json();
-    } else {
-      throw new Error("API request failed");
-    }
-  })
-  .then((data) => {
-    // Get array of connected anime
-    let relatedAnime = data["data"];
-    
-    // Iterate over each anime
-    for (let i = 0; i < Math.min(relatedAnime.length, 10); i++) {
-      if (graphedAnime.has(relatedAnime[i]["entry"]["mal_id"]) && !connectedAnime.has(relatedAnime[i]["entry"]["mal_id"])) {
-        // Add the given anime to the graph
-        let edge = {
-          group: "edges",
-          data: {
-            source: id,
-            target: relatedAnime[i]["entry"]["mal_id"],
-            "weight": i
-          }
-        };
-        // Add edge to graph
-        elements.push(edge);
-      }
-    }
-    connectedAnime.add(id)
-  })
-  .catch((error) => {
-    console.error(error);
-  });
-}
-*/
