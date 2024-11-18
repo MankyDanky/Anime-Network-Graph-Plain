@@ -189,6 +189,8 @@ sleep(2000).then(() => {
     toggleInfoBoard();
   });
 
+  cy.autoungrabify(true);
+
 })
 
 

@@ -2,9 +2,6 @@ import requests
 import time
 import json
 
-
-
-
 data = []
 graphed = set()
 for i in range(8):
@@ -26,7 +23,7 @@ connected = {}
 
 for i in range(200):
     id = data[i]["data"]["id"]
-    print("https://api.jikan.moe/v4/anime/" + str(id) + "/recommendations")
+    print(i, "https://api.jikan.moe/v4/anime/" + str(id) + "/recommendations")
     response = requests.get("https://api.jikan.moe/v4/anime/" + str(id) + "/recommendations")
 
     recommendations = response.json()["data"]
