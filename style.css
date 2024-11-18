@@ -1,3 +1,8 @@
+html, body {
+    margin: 0; height: 100%; overflow: hidden
+}
+
+
 #icon {
     position: absolute;
     border-radius: 2vw;
@@ -106,7 +111,7 @@ th {
     margin: 0px;
     padding: 0px;
     background-color: rgba(0, 0, 0, 0.5);
-    top: 125%;
+    bottom: -55%;
     transition-timing-function: ease-out;
     transition-duration: 250ms;
 }

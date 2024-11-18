@@ -83,7 +83,8 @@ function main() {
     cy = cytoscape({
       container: document.getElementById("cy"),
       // Graph layout
-      zoom: 1,
+      maxZoom: 5, // zoom in amount
+      minZoom: 0.2, // zoom out amount
       layout: {
         name: 'cose',
           animate: false,
@@ -94,7 +95,7 @@ function main() {
           idealEdgeLength: 1000,
           gravity: 0,
           initialTemp: 3000,
-          randomize: true
+          randomize: true,
       },
       // Graph style
       style: [
@@ -194,6 +195,10 @@ function main() {
         selectedNode = node.data("id");
         toggleInfoBoard();
       })
+      
+      // center to the node
+      cy.zoom(1)
+      cy.center(node);
     });
     
     cy.on("unselect", "node", function(evt) {
