@@ -117,7 +117,7 @@ sleep(2000).then(() => {
           width: "data(size)",
           "overlay-opacity": 0,
           "background-color": "#808080",
-          "transition-property": "background-color, font-size",
+          "transition-property": "background-color, font-size, visibility",
           'transition-duration': "0.1s",
           "transition-timing-function": "ease",
         },
