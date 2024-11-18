@@ -86,12 +86,15 @@ sleep(2000).then(() => {
     container: document.getElementById("cy"),
     // Graph layout
     layout: {
-      name: 'cose-bilkent',
-        animate: 'end',
+      name: 'cose',
+        animate: false,
         animationEasing: 'ease-out',
         animationDuration: 1000,
         nodeRepulsion: 2000000,
+        nodeOverlap: 1000000,
         idealEdgeLength: 1000,
+        gravity: 0,
+        initialTemp: 3000,
         randomize: true
     },
     // Graph style
@@ -122,7 +125,7 @@ sleep(2000).then(() => {
           "overlay-opacity": 0,
           "line-color": "#808080",
           "width": function(edge){
-            return 5/edge.data("weight")
+            return 1.5/edge.data("weight")
           },
           "overlay-opacity": 0
         },
