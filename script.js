@@ -239,16 +239,8 @@ sleep(2000).then(() => {
       let hiddenNodes = new Set();
       let nodes = cy.nodes();
       for (let i = 0; i < nodes.length; i++) {
-        let titles = nodes[i].data("alternateTitles").split(' ');
-        console.log(titles)
-        let hide = true;
-        for (let j = 0; j < titles.length; j++) {
-          if (titles[j].toLowerCase().includes(filterText)) {
-            hide = false;
-            break;
-          }
-        }
-        if (hide) {
+        let titles = nodes[i].data("alternateTitles");
+        if (!titles.toLowerCase().includes(filterText)) {
           hiddenNodes.add(nodes[i].data("id"))
           nodes[i].addClass("hidden")
         }
@@ -264,3 +256,5 @@ sleep(2000).then(() => {
   }
 
 })
+
+console.log()

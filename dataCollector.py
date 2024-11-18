@@ -15,7 +15,7 @@ for i in range(8):
             node["group"] = "nodes"
             alternateTitles = anime["titles"][0]["title"]
             for j in range(1, len(anime["titles"])):
-                alternateTitles += " " + anime["titles"][j]["title"]
+                alternateTitles += "," + anime["titles"][j]["title"]
             node["data"] = {"id": anime["mal_id"], "title": anime["titles"][0]["title"], "size": anime["members"]*300/5000000, "alternateTitles": alternateTitles}
             data.append(node)
     except:
