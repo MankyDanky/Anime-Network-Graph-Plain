@@ -94,7 +94,7 @@ function main() {
       // zoom levels
       zoom: 1,
       maxZoom: 5, // zoom in amount
-      minZoom: 0.2, // zoom out amount
+      minZoom: 0.05, // zoom out amount
       // Graph layout
       layout: {
         name: 'cose',
@@ -249,6 +249,13 @@ function main() {
         let filterText = searchBox.value.toLowerCase();
         filterByText(filterText);
       });
+    });
+
+    // Remove loading screen after content is done loading
+    let loadingScreen = document.getElementById("loading");
+    loadingScreen.classList.add("loaded");
+    sleep(250).then(()=> {
+      loadingScreen.remove();
     });
 
   })
