@@ -198,19 +198,23 @@ function main() {
     
     cy.on("select", "node", function(evt) {
       let node = evt.target;
-
-      // get the neighbors of the selected node and highlight them
       let neighbors = node.neighborhood('node');
       
-      for (let i=0;i<neighbors.length;i++){
-        neighbors[i].addClass("neighbor");
-      }  
       
       // Give enough time to hide board if a node is selected then redisplay board
       sleep(250).then(()=>{
 
         selectedNode = node.data("id");
         toggleInfoBoard();
+        sleep(250).then(()=>{
+          // get the neighbors of the selected node and highlight them
+          
+          
+          
+          for (let i=0;i<neighbors.length;i++){
+            neighbors[i].addClass("neighbor");
+          }
+        });
       })
     });
     
@@ -220,10 +224,13 @@ function main() {
       let node = evt.target;
       let neighbors = node.neighborhood('node');
       
-      // de-highlight the neighboring nodes
-      for (let i=0;i<neighbors.length;i++){
-        neighbors[i].removeClass("neighbor");
-      }  
+      sleep(250).then(()=> {
+        // de-highlight the neighboring nodes
+        for (let i=0;i<neighbors.length;i++){
+          neighbors[i].removeClass("neighbor");
+        }
+      });
+
     });
 
     // Lock nodes
@@ -238,8 +245,10 @@ function main() {
     // Filter node visibility while typing
     let searchBox = document.getElementById("searchText");
     searchBox.addEventListener("keydown", () => {
-      let filterText = searchBox.value;
-      filterByText(filterText)
+      sleep(100).then(()=>{
+        let filterText = searchBox.value.toLowerCase();
+        filterByText(filterText);
+      });
     });
 
   })
