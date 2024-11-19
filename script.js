@@ -230,41 +230,60 @@ function main() {
     cy.autoungrabify(true);
 
     // Filter node visibility when search button clicked
-    document.getElementById("searchButton").onclick = function() {
-      let newElements = []
+    document.getElementById("searchButton").addEventListener("click", () => {
       let filterText = document.getElementById("searchText").value.toLowerCase();
-      console.log(filterText);
-      if (filterText === "") {
-        let elements = cy.elements();
-        for (let i = 0; i < elements.length; i++) {
-          elements[i].removeClass("hidden")
-        }
-      } else {
-        let elements = cy.elements();
-        for (let i = 0; i < elements.length; i++) {
-          elements[i].removeClass("hidden")
-        }
+      filterByText(filterText);
+    })
 
-        let hiddenNodes = new Set();
-        let nodes = cy.nodes();
-        for (let i = 0; i < nodes.length; i++) {
-          let titles = nodes[i].data("alternateTitles");
-          if (!titles.toLowerCase().includes(filterText)) {
-            hiddenNodes.add(nodes[i].data("id"))
-            nodes[i].addClass("hidden")
-          }
-        }
-
-        let edges = cy.edges();
-        for (let i = 0; i < edges.length; i++) {
-          if (hiddenNodes.has(edges[i].data("target")) || hiddenNodes.has(edges[i].data("source"))) {
-            edges[i].addClass("hidden")
-          }
-        }
-      }
-    }
+    // Filter node visibility while typing
+    let searchBox = document.getElementById("searchText");
+    searchBox.addEventListener("keydown", () => {
+      let filterText = searchBox.value;
+      filterByText(filterText)
+    });
 
   })
 }
+
+// function for filtering node visibility with filtertext
+function filterByText(filterText) {
+
+  // if empty, show all
+  if (filterText === "") {
+    let elements = cy.elements();
+    for (let i = 0; i < elements.length; i++) {
+      elements[i].removeClass("hidden")
+    }
+  } else {
+
+    // first remove all previous hidden attributes from nodes
+    let elements = cy.elements();
+    for (let i = 0; i < elements.length; i++) {
+      elements[i].removeClass("hidden")
+    }
+
+    let hiddenNodes = new Set();
+    let nodes = cy.nodes();
+    
+    // if the filter doesn't match any text in the alt. titles of the anime
+    // the node will be hidden
+    for (let i = 0; i < nodes.length; i++) {
+      let titles = nodes[i].data("alternateTitles");
+      if (!titles.toLowerCase().includes(filterText)) {
+        hiddenNodes.add(nodes[i].data("id"))
+        nodes[i].addClass("hidden")
+      }
+    }
+
+    // if one of the nodes is hidden, the edge is also hidden
+    let edges = cy.edges();
+    for (let i = 0; i < edges.length; i++) {
+      if (hiddenNodes.has(edges[i].data("target")) || hiddenNodes.has(edges[i].data("source"))) {
+        edges[i].addClass("hidden")
+      }
+    }
+  }
+}
+
 
 main();
